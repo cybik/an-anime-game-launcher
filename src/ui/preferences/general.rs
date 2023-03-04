@@ -14,6 +14,7 @@ use anime_launcher_sdk::config::launcher::LauncherStyle;
 use anime_launcher_sdk::anime_game_core::prelude::*;
 use anime_launcher_sdk::components::*;
 use anime_launcher_sdk::wincompatlib::prelude::*;
+use anime_launcher_sdk::integrations::steam;
 
 use super::main::PreferencesAppMsg;
 use crate::ui::components;
@@ -461,6 +462,7 @@ impl SimpleAsyncComponent for GeneralApp {
                 adw::ActionRow {
                     set_title: &tr("recommended-only"),
                     set_subtitle: &tr("wine-recommended-description"),
+                    set_visible: !(steam::launched_from_steam()),
 
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
@@ -483,6 +485,7 @@ impl SimpleAsyncComponent for GeneralApp {
 
             add = &adw::PreferencesGroup {
                 set_title: &tr("dxvk-version"),
+                set_visible: !(steam::launched_from_steam()),
 
                 #[watch]
                 set_description: Some(&if !model.allow_dxvk_selection {
@@ -546,6 +549,7 @@ impl SimpleAsyncComponent for GeneralApp {
                 set_sensitive: model.allow_dxvk_selection,
 
                 add = model.dxvk_components.widget(),
+                set_visible: !(steam::launched_from_steam()),
             },
         }
     }

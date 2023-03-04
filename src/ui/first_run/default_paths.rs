@@ -103,6 +103,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                 #[watch]
                 set_visible: model.show_additional,
 
+                // TODO: conditional on "not being steam"
                 adw::ActionRow {
                     set_title: &tr("runners-folder"),
                     set_icon_name: Some("folder-symbolic"),
@@ -114,6 +115,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     connect_activated => DefaultPathsAppMsg::ChoosePath(Folders::Runners)
                 },
 
+                // TODO: conditional on "not being steam"
                 adw::ActionRow {
                     set_title: &tr("dxvks-folder"),
                     set_icon_name: Some("folder-symbolic"),
