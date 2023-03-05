@@ -1,0 +1,5 @@
+#! /bin/zsh
+
+mkdir -p docker
+
+docker build -f Dockerfile ./docker --tag aagl-relmbuild:latest --tag aagl-relmbuild:$(date '+%s')
