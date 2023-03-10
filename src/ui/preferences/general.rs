@@ -21,6 +21,7 @@ use crate::ui::components;
 use crate::ui::components::*;
 use crate::i18n::*;
 use crate::*;
+use anime_launcher_sdk::integrations::steam;
 
 #[derive(Debug)]
 struct VoicePackageComponent {
@@ -462,6 +463,7 @@ impl SimpleAsyncComponent for GeneralApp {
                 adw::ActionRow {
                     set_title: &tr("recommended-only"),
                     set_subtitle: &tr("wine-recommended-description"),
+                    set_visible: !(steam::launched_from_steam()),
 
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
@@ -484,6 +486,7 @@ impl SimpleAsyncComponent for GeneralApp {
 
             add = &adw::PreferencesGroup {
                 set_title: &tr("dxvk-version"),
+                set_visible: !(steam::launched_from_steam()),
 
                 #[watch]
                 set_description: Some(&if !model.allow_dxvk_selection {
@@ -545,6 +548,7 @@ impl SimpleAsyncComponent for GeneralApp {
             add = &adw::PreferencesGroup {
                 #[watch]
                 set_sensitive: model.allow_dxvk_selection,
+                set_visible: !(steam::launched_from_steam()),
 
                 add = model.dxvk_components.widget(),
             },
