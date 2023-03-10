@@ -25,6 +25,7 @@ use crate::ui::components;
 use crate::ui::components::*;
 use crate::i18n::*;
 use crate::*;
+use anime_launcher_sdk::integrations::steam;
 
 #[derive(Debug)]
 struct VoicePackageComponent {
@@ -675,6 +676,7 @@ impl SimpleAsyncComponent for GeneralApp {
                 adw::ActionRow {
                     set_title: &tr("recommended-only"),
                     set_subtitle: &tr("wine-recommended-description"),
+                    set_visible: !(steam::launched_from_steam()),
 
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
@@ -748,6 +750,7 @@ impl SimpleAsyncComponent for GeneralApp {
 
             add = &adw::PreferencesGroup {
                 set_title: &tr("dxvk-version"),
+                set_visible: !(steam::launched_from_steam()),
 
                 #[watch]
                 set_description: Some(&if !model.allow_dxvk_selection {
@@ -809,6 +812,7 @@ impl SimpleAsyncComponent for GeneralApp {
             add = &adw::PreferencesGroup {
                 #[watch]
                 set_sensitive: model.allow_dxvk_selection,
+                set_visible: !(steam::launched_from_steam()),
 
                 add = model.dxvk_components.widget(),
             },
@@ -1150,9 +1154,14 @@ impl SimpleAsyncComponent for GeneralApp {
                             let wine_name = version.name.to_string();
 
                             std::thread::spawn(move || {
+                                if steam::is_prefix_update_disabled() {
+                                    config.game.wine.selected = Some(wine_name);
+
+                                    config::update(config);
+                                } else {
                                 match wine.update_prefix::<&str>(None) {
                                     Ok(_) => {
-                                        config.game.wine.selected = Some(wine_name); 
+                                        config.game.wine.selected = Some(wine_name);
 
                                         config::update(config);
                                     }
@@ -1163,6 +1172,7 @@ impl SimpleAsyncComponent for GeneralApp {
                                             description: Some(err.to_string())
                                         });
                                     }
+                                }
                                 }
 
                                 sender.input(GeneralAppMsg::ResetWineSelection(index));
