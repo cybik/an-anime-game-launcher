@@ -26,6 +26,7 @@ use super::main::PreferencesAppMsg;
 use crate::ui::migrate_installation::MigrateInstallationApp;
 use crate::i18n::*;
 use crate::*;
+use anime_launcher_sdk::integrations::steam;
 
 #[derive(Debug)]
 struct VoicePackageComponent {
@@ -653,6 +654,7 @@ impl SimpleAsyncComponent for GeneralApp {
                 adw::ActionRow {
                     set_title: &tr("components"),
                     set_subtitle: &tr("components-description"),
+                    set_visible: !(steam::launched_from_steam()),
 
                     add_suffix = &gtk::Image {
                         set_icon_name: Some("go-next-symbolic")
