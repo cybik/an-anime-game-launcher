@@ -8,6 +8,8 @@ use anime_launcher_sdk::genshin::config::Config;
 use crate::i18n::*;
 use super::{App, AppMsg};
 
+use anime_launcher_sdk::integrations::steam;
+
 pub fn create_prefix(sender: ComponentSender<App>) {
     let config = Config::get().unwrap();
 
@@ -22,13 +24,15 @@ pub fn create_prefix(sender: ComponentSender<App>) {
                     .with_loader(WineLoader::Current)
                     .with_arch(WineArch::Win64);
 
-                if let Err(err) = wine.update_prefix::<&str>(None) {
-                    tracing::error!("Failed to create wine prefix");
+                if ! steam::is_prefix_update_disabled() {
+                    if let Err(err) = wine.update_prefix::<&str>(None) {
+                        tracing::error!("Failed to create wine prefix");
 
-                    sender.input(AppMsg::Toast {
-                        title: tr("wine-prefix-update-failed"),
-                        description: Some(err.to_string())
-                    });
+                        sender.input(AppMsg::Toast {
+                            title: tr("wine-prefix-update-failed"),
+                            description: Some(err.to_string())
+                        });
+                    }
                 }
 
                 sender.input(AppMsg::DisableButtons(false));
