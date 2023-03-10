@@ -15,6 +15,7 @@ use super::main::FirstRunAppMsg;
 use crate::ui::components::*;
 use crate::i18n::*;
 use crate::*;
+use anime_launcher_sdk::integrations::steam;
 
 fn get_installer(uri: &str, temp: Option<&PathBuf>) -> anyhow::Result<Installer> {
     let mut installer = Installer::new(uri)?;
@@ -116,6 +117,7 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 #[local_ref]
                 dxvk_combo -> adw::ComboRow {
                     set_title: &tr("dxvk-version"),
+                    set_visible: !(steam::launched_from_steam()),
 
                     #[watch]
                     set_model: Some(&gtk::StringList::new(model.dxvk_versions.iter()
@@ -345,6 +347,9 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
 
                 let wine = self.selected_wine.clone().unwrap();
                 let progress_bar_input = self.progress_bar.sender().clone();
+                if wine.managed {
+                    return
+                }
 
                 // Skip wine downloading if it was already done
                 if wine.is_downloaded_in(&config.game.wine.builds) {
