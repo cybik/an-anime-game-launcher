@@ -338,13 +338,16 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
 
                 self.downloading_wine_version = self.selected_wine.clone().unwrap().title;
                 self.downloading_dxvk_version = self.selected_dxvk.clone().unwrap().name;
+                self.creating_prefix_path     = config.game.wine.prefix.to_string_lossy().to_string();
 
                 self.downloading = true;
                 self.downloading_wine = Some(false);
 
                 let wine = self.selected_wine.clone().unwrap();
-                self.creating_prefix_path     = wine.prefix_path(&config.components.path, config.game.wine.prefix.clone()).to_string_lossy().to_string();
                 let progress_bar_input = self.progress_bar.sender().clone();
+                if wine.managed {
+                    return
+                }
 
                 // Skip wine downloading if it was already done
                 if wine.is_downloaded_in(&config.game.wine.builds) {
@@ -448,7 +451,6 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 tracing::info!("Creating wine prefix");
 
                 let wine = self.selected_wine.as_ref().unwrap();
-                let true_prefix = wine.prefix_path(&config.components.path, config.game.wine.prefix.clone());
 
                 let wine = wine
                     .to_wine(config.components.path, Some(config.game.wine.builds.join(&wine.name)))
@@ -457,7 +459,7 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                     .with_arch(WineArch::Win64);
 
                 std::thread::spawn(move || {
-                    match wine.update_prefix::<&str>(true_prefix) {
+                    match wine.update_prefix::<&str>(None) {
                         // Download DXVK
                         Ok(_) => sender.input(DownloadComponentsAppMsg::DownloadDXVK),
 
@@ -563,7 +565,6 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 let dxvk = self.selected_dxvk.clone().unwrap();
 
                 let group = wine.find_group(&config.components.path).unwrap().unwrap();
-                let true_prefix = wine.prefix_path(&config.components.path, config.game.wine.prefix.clone());
 
                 // Apply DXVK if we need it
                 if wine.features_in(&group).unwrap_or_default().need_dxvk {
@@ -571,7 +572,7 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                         .to_wine(config.components.path, Some(config.game.wine.builds.join(&wine.name)))
                         .with_loader(WineLoader::Current)
                         .with_arch(WineArch::Win64)
-                        .with_prefix(true_prefix);
+                        .with_prefix(config.game.wine.prefix);
 
                     std::thread::spawn(move || {
                         let params = InstallParams {
