@@ -24,6 +24,7 @@ use crate::ui::components::*;
 
 use super::preferences::main::*;
 use super::about::*;
+use rust_strings::{FileConfig, strings};
 
 relm4::new_action_group!(WindowActionGroup, "win");
 
@@ -31,6 +32,7 @@ relm4::new_stateless_action!(LauncherFolder, WindowActionGroup, "launcher_folder
 relm4::new_stateless_action!(GameFolder, WindowActionGroup, "game_folder");
 relm4::new_stateless_action!(ConfigFile, WindowActionGroup, "config_file");
 relm4::new_stateless_action!(DebugFile, WindowActionGroup, "debug_file");
+relm4::new_stateless_action!(WishUrl, WindowActionGroup, "wish_url");
 
 relm4::new_stateless_action!(About, WindowActionGroup, "about");
 
@@ -95,6 +97,27 @@ pub enum AppMsg {
     }
 }
 
+fn get_wishes_url() -> Option<String> {
+    let cachepath = crate::config::get().unwrap().game.path.join("GenshinImpact_Data/webCaches/Cache/Cache_Data/data_2");
+    if !cachepath.exists() { // Check 1: does the cache even exist.
+        return None;
+    }
+    let config = FileConfig::new(cachepath.as_path()).with_min_length(25);
+    match strings(&config) {
+        Ok(thestrings) => {
+            for element in thestrings.iter().rev() {
+                // Iterate through ALL, from the end, and return the first wish match
+                //  (which would be the last matchingURL in the file)
+                if element.0.contains("e20190909gacha-v2") && element.0.contains("webstatic-sea.hoyoverse.com") {
+                    return Some(element.0.clone().replacen("1/0/", "", 1));
+                }
+            }
+        }
+        Err(_) => { }
+    }
+    None // No wish URLs were found.
+}
+
 #[relm4::component(pub)]
 impl SimpleComponent for App {
     type Init = ();
@@ -108,6 +131,10 @@ impl SimpleComponent for App {
                 &tr("game-folder") => GameFolder,
                 &tr("config-file") => ConfigFile,
                 &tr("debug-file") => DebugFile,
+            },
+
+            section! {
+                &tr("wish-url") => WishUrl
             },
 
             section! {
@@ -557,6 +584,29 @@ impl SimpleComponent for App {
                     });
 
                     tracing::error!("Failed to open config file: {err}");
+                }
+            }
+        })));
+
+        group.add_action::<WishUrl>(&RelmAction::new_stateless(clone!(@strong sender => move |_| {
+            // TODO: Extract wish URL from the prefix as possible
+            match get_wishes_url() {
+                Some(url) => {
+                    tracing::warn!("{}", url);
+                    if let Err(err) = open::that(format!("{url}#/log")) {
+                        sender.input(AppMsg::Toast {
+                            title: tr("wish-url-error"),
+                            description: Some(err.to_string())
+                        });
+                        tracing::error!("Failed to open wishes URL target: {err}");
+                    }
+                }
+                None => {
+                    // TODO: yell
+                    sender.input(AppMsg::Toast {
+                        title: tr("wish-url-error-none"),
+                        description: Some(tr("wish-url-error-none-text"))
+                    });
                 }
             }
         })));
