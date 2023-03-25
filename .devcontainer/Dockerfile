@@ -6,15 +6,9 @@ RUN dnf install -y zsh util-linux-user git
 RUN chsh root -s /bin/zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
 
-RUN groupadd -g 1000 build
-RUN useradd -u 1000 -g 1000 -m build
-
-RUN chsh build -s /bin/zsh
-RUN mkdir /Depot
-
-USER build
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
-
 WORKDIR /Depot
-SHELL [ "/bin/zsh", "-l" ]
-CMD [ "zsh" ]
+
+RUN dnf install -y openssh-server openssh-clients lsof
+
+# Simulate VSCode's installer
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/cybik/an-anime-game-launcher/aagl-steammode-horrors/25mar23/.devcontainer/sshstrap.sh)"

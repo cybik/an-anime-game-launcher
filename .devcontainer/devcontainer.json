@@ -6,10 +6,6 @@
 	"service": "aagl-relm-env",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	"features": {
-	  "ghcr.io/devcontainers/features/sshd:1": {}
-	},
   
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": ".devcontainer/post-create.sh",
@@ -28,7 +24,8 @@
 				"i18n"
 			],
 			"editor.tabCompletion": "on",
-			"diffEditor.codeLens": true
+			"diffEditor.codeLens": true,
+			"terminal.integrated.defaultProfile.linux": "zsh"
 		},
 		// Add the IDs of extensions you want installed when the container is created.
 		"extensions": [
