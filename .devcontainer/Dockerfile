@@ -12,3 +12,5 @@ RUN dnf install -y openssh-server openssh-clients lsof
 
 # Simulate VSCode's installer
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/cybik/an-anime-game-launcher/aagl-steammode-horrors/25mar23/.devcontainer/sshstrap.sh)"
+
+ARG USERNAME=root

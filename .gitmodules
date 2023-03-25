@@ -1,3 +1,3 @@
 [submodule "anime-launcher-sdk"]
 	path = anime-launcher-sdk
-	url = git@github.com:cybik/anime-launcher-sdk.git
+	url = https://github.com/cybik/anime-launcher-sdk.git
