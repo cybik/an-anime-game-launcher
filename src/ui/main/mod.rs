@@ -20,6 +20,7 @@ mod launch;
 use anime_launcher_sdk::config::launcher::LauncherStyle;
 use anime_launcher_sdk::states::LauncherState;
 use anime_launcher_sdk::components::loader::ComponentsLoader;
+use anime_launcher_sdk::integrations::steam;
 
 use crate::*;
 use crate::i18n::*;
@@ -136,14 +137,17 @@ impl SimpleComponent for App {
 
             #[watch]
             set_default_size: (
+                steam::default_window_size_width(
                 match model.style {
                     LauncherStyle::Modern => 900,
                     LauncherStyle::Classic => 1094 // (w = 1280 / 730 * h, where 1280x730 is default background picture resolution)
-                },
+                }),
+                steam::default_window_size_height(
                 match model.style {
                     LauncherStyle::Modern => 600,
                     LauncherStyle::Classic => 624
                 }
+                )
             ),
 
             #[watch]

@@ -5,6 +5,7 @@ use gtk::prelude::*;
 use adw::prelude::*;
 
 use anime_launcher_sdk::components::loader::ComponentsLoader;
+use anime_launcher_sdk::integrations::steam;
 
 use crate::i18n::tr;
 use crate::*;
@@ -62,7 +63,7 @@ impl SimpleComponent for FirstRunApp {
 
     view! {
         window = adw::Window {
-            set_default_size: (780, 560),
+            set_default_size: (steam::default_window_size_width(780), steam::default_window_size_height(560)),
 
             #[watch]
             set_title: Some(&model.title),
@@ -273,6 +274,7 @@ impl SimpleComponent for FirstRunApp {
 
             FirstRunAppMsg::ScrollToFinish => {
                 self.title = tr("finish");
+                std::fs::remove_file(FIRST_RUN_FILE.as_path());
 
                 self.carousel.scroll_to(self.finish.widget(), true);
             }
