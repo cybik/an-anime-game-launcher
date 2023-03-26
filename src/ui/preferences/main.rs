@@ -10,6 +10,8 @@ use anime_launcher_sdk::config::ConfigExt;
 use anime_launcher_sdk::genshin::config::Config;
 use anime_launcher_sdk::genshin::config::schema::launcher::LauncherStyle;
 
+use anime_launcher_sdk::integrations::steam;
+
 use crate::i18n::tr;
 
 use super::general::*;
@@ -56,8 +58,7 @@ impl SimpleAsyncComponent for PreferencesApp {
     view! {
         preferences_window = adw::PreferencesWindow {
             set_title: Some(&tr("preferences")),
-            set_default_size: (700, 560),
-
+            set_default_size: (steam::default_window_size_width(700), steam::default_window_size_height(560)),
             set_hide_on_close: true,
             set_modal: true,
             set_search_enabled: true,
