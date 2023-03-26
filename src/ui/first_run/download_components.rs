@@ -625,8 +625,6 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
 
             #[allow(unused_must_use)]
             DownloadComponentsAppMsg::Continue => {
-                std::fs::remove_file(FIRST_RUN_FILE.as_path());
-
                 sender.output(Self::Output::ScrollToFinish);
             }
 

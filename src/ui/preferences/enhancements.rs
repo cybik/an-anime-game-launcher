@@ -9,6 +9,7 @@ use anime_launcher_sdk::genshin::config::Config;
 use anime_launcher_sdk::config::schema_blanks::prelude::*;
 
 use anime_launcher_sdk::is_available;
+use anime_launcher_sdk::integrations::steam;
 
 use crate::i18n::tr;
 use crate::*;
@@ -98,6 +99,7 @@ impl SimpleAsyncComponent for EnhancementsApp {
 
                 adw::ActionRow {
                     set_title: &tr("borderless-window"),
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
@@ -118,6 +120,7 @@ impl SimpleAsyncComponent for EnhancementsApp {
 
                 adw::ComboRow {
                     set_title: &tr("virtual-desktop"),
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[wrap(Some)]
                     set_model = &gtk::StringList::new(&[
@@ -191,6 +194,7 @@ impl SimpleAsyncComponent for EnhancementsApp {
                 adw::ComboRow {
                     set_title: &tr("fsr"),
                     set_subtitle: &tr("fsr-description"),
+                    set_visible: !(steam::launched_from_steam()),
 
                     #[wrap(Some)]
                     set_model = &gtk::StringList::new(&[
@@ -295,6 +299,7 @@ impl SimpleAsyncComponent for EnhancementsApp {
 
             add = &adw::PreferencesGroup {
                 set_title: &tr("discord-rpc"),
+                set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                 adw::ActionRow {
                     set_title: &tr("enabled"),
@@ -349,6 +354,7 @@ impl SimpleAsyncComponent for EnhancementsApp {
 
             add = &adw::PreferencesGroup {
                 set_title: &tr("fps-unlocker"),
+                set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                 adw::ComboRow {
                     set_title: &tr("enabled"),
