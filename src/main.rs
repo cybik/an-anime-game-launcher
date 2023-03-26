@@ -19,6 +19,7 @@ pub mod ui;
 
 use ui::main::*;
 use ui::first_run::main::*;
+use anime_launcher_sdk::integrations::steam;
 
 pub const APP_ID: &str = "moe.launcher.an-anime-game-launcher";
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -26,6 +27,8 @@ pub const APP_DEBUG: bool = cfg!(debug_assertions);
 
 /// Sets to `true` when the `App` component is ready (fully initialized)
 pub static mut READY: bool = false;
+
+use std::env;
 
 // TODO: get rid of using this function in all the components' events
 //       e.g. by converting preferences pages into Relm4 Components
@@ -119,6 +122,12 @@ fn main() {
         .init();
 
     tracing::info!("Starting application ({APP_VERSION})");
+
+    if steam::is_steam_deck() {
+        for (key, value) in env::vars() {
+            tracing::warn!("{}", format!("Carried env {} :: {}", key, value ));
+        }
+    }
 
     adw::init().expect("Libadwaita initialization failed");
 

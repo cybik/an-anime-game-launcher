@@ -6,6 +6,7 @@ use adw::prelude::*;
 use anime_launcher_sdk::config;
 
 use std::path::PathBuf;
+use anime_launcher_sdk::integrations::steam;
 
 use crate::*;
 use crate::i18n::*;
@@ -123,6 +124,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("runners-folder"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam()),
 
                     #[watch]
                     set_subtitle: model.runners.to_str().unwrap(),
@@ -134,6 +136,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("dxvks-folder"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[watch]
                     set_subtitle: model.dxvks.to_str().unwrap(),
@@ -145,6 +148,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("wine-prefix-folder"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[watch]
                     set_subtitle: model.prefix.to_str().unwrap(),
@@ -178,6 +182,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("fps-unlocker-folder"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[watch]
                     set_subtitle: model.fps_unlocker.to_str().unwrap(),
@@ -189,6 +194,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("components-index"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[watch]
                     set_subtitle: model.components.to_str().unwrap(),
@@ -200,6 +206,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("patch-folder"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[watch]
                     set_subtitle: model.patch.to_str().unwrap(),
@@ -211,6 +218,7 @@ impl SimpleAsyncComponent for DefaultPathsApp {
                     set_title: &tr("temp-folder"),
                     set_icon_name: Some("folder-symbolic"),
                     set_activatable: true,
+                    set_visible: !(steam::launched_from_steam() && steam::is_steam_deck()),
 
                     #[watch]
                     set_subtitle: model.temp.to_str().unwrap(),

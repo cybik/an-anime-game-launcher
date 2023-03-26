@@ -4,6 +4,7 @@ use relm4::component::*;
 use adw::prelude::*;
 
 use anime_launcher_sdk::config;
+use anime_launcher_sdk::integrations::steam;
 
 use crate::i18n::*;
 use super::main::*;
@@ -137,7 +138,13 @@ impl SimpleAsyncComponent for SelectVoiceoversApp {
             #[allow(unused_must_use)]
             SelectVoiceoversAppMsg::Continue => {
                 match self.update_config() {
-                    Ok(_) => sender.output(Self::Output::ScrollToDownloadComponents),
+                    Ok(_) => {
+                        if steam::launched_from_steam() {
+                            sender.output(Self::Output::ScrollToFinish)
+                        } else {
+                            sender.output(Self::Output::ScrollToDownloadComponents)
+                        }
+                    },
     
                     Err(err) => sender.output(Self::Output::Toast {
                         title: tr("config-update-error"),

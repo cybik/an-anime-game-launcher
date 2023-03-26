@@ -6,6 +6,8 @@ use adw::prelude::*;
 use crate::i18n::*;
 use super::main::*;
 
+use crate::*;
+
 pub struct FinishApp;
 
 #[derive(Debug, Clone)]
@@ -82,7 +84,10 @@ impl SimpleAsyncComponent for FinishApp {
 
     async fn update(&mut self, msg: Self::Input, _sender: AsyncComponentSender<Self>) {
         match msg {
+            #[allow(unused_must_use)]
             FinishAppMsg::Restart => {
+                std::fs::remove_file(FIRST_RUN_FILE.as_path());
+
                 std::process::Command::new(std::env::current_exe().unwrap()).spawn().unwrap();
 
                 relm4::main_application().quit();

@@ -695,6 +695,7 @@ impl SimpleAsyncComponent for GeneralApp {
 
             add = &adw::PreferencesGroup {
                 add = model.wine_components.widget(),
+                set_visible: !(steam::launched_from_steam()),
             },
 
             add = &adw::PreferencesGroup {
