@@ -16,6 +16,7 @@ use super::dependencies::*;
 use super::default_paths::*;
 use super::select_voiceovers::*;
 use super::download_components::*;
+use super::download_components_steam::*;
 use super::finish::*;
 
 pub static mut MAIN_WINDOW: Option<adw::ApplicationWindow> = None;
@@ -28,6 +29,7 @@ pub struct FirstRunApp {
     dependencies: AsyncController<DependenciesApp>,
     default_paths: AsyncController<DefaultPathsApp>,
     select_voiceovers: AsyncController<SelectVoiceoversApp>,
+    download_components_steam: AsyncController<DownloadComponentsSteamApp>,
     download_components: AsyncController<DownloadComponentsApp>,
     finish: AsyncController<FinishApp>,
 
@@ -47,6 +49,7 @@ pub enum FirstRunAppMsg {
     ScrollToDefaultPaths,
     ScrollToSelectVoiceovers,
     ScrollToDownloadComponents,
+    ScrollToDownloadComponentsSteam,
     ScrollToFinish,
 
     Toast {
@@ -107,6 +110,7 @@ impl SimpleComponent for FirstRunApp {
                         append = model.default_paths.widget(),
                         append = model.select_voiceovers.widget(),
                         append = model.download_components.widget(),
+                        append = model.download_components_steam.widget(),
                         append = model.finish.widget(),
                     },
 
@@ -150,6 +154,10 @@ impl SimpleComponent for FirstRunApp {
                 .forward(sender.input_sender(), std::convert::identity),
 
             select_voiceovers: SelectVoiceoversApp::builder()
+                .launch(())
+                .forward(sender.input_sender(), std::convert::identity),
+
+            download_components_steam: DownloadComponentsSteamApp::builder()
                 .launch(())
                 .forward(sender.input_sender(), std::convert::identity),
 
@@ -214,6 +222,16 @@ impl SimpleComponent for FirstRunApp {
                 self.title = tr("select-voice-packages");
 
                 self.carousel.scroll_to(self.select_voiceovers.widget(), true);
+            }
+
+            #[allow(unused_must_use)]
+            FirstRunAppMsg::ScrollToDownloadComponentsSteam => {
+                let components_sender = self.download_components_steam.sender().clone();
+                components_sender.send(DownloadComponentsSteamAppMsg::UpdateVersionsLists);
+
+                self.title = tr("download-components-steam");
+
+                self.carousel.scroll_to(self.download_components_steam.widget(), true);
             }
 
             FirstRunAppMsg::ScrollToDownloadComponents => {
