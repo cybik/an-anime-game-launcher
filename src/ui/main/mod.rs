@@ -142,8 +142,7 @@ impl SimpleComponent for App {
     view! {
         main_window = adw::ApplicationWindow {
             set_icon_name: Some(APP_ID),
-            set_resizable: (steam::is_steam_deck()),
-            is_fullscreen: (steam::is_steam_deck()),
+            set_resizable: steam::is_steam_deck(),
 
             #[watch]
             set_default_size: (

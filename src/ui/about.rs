@@ -35,8 +35,7 @@ impl SimpleComponent for AboutDialog {
         dialog = adw::AboutWindow {
             set_application_name: "An Anime Game Launcher",
             set_application_icon: APP_ID,
-            set_resizable: (steam::is_steam_deck()),
-            is_fullscreen: (steam::is_steam_deck()),
+            set_resizable: steam::is_steam_deck(),
 
             set_website: "https://github.com/an-anime-team/an-anime-game-launcher",
             set_issue_url: "https://github.com/an-anime-team/an-anime-game-launcher/issues",
