@@ -64,6 +64,8 @@ impl SimpleComponent for FirstRunApp {
     view! {
         window = adw::Window {
             set_default_size: (steam::default_window_size_width(780), steam::default_window_size_height(560)),
+            set_resizable: (steam::is_steam_deck()),
+            is_fullscreen: (steam::is_steam_deck()),
 
             #[watch]
             set_title: Some(&model.title),

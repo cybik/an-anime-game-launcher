@@ -31,6 +31,9 @@ missing-dependencies-message = You must install some packages to your system bef
 
 default-paths = Default paths
 choose-default-paths = Choose default paths
+choose-default-paths-deck = Choose Install Path
+choose-default-paths-deck-internal = Internal Storage
+choose-default-paths-deck-external = External Storage
 show-all-folders = I know what I'm doing
 show-all-folders-subtitle = Show additional path selection settings. Do as I say...
 runners-folder = Runners folder
