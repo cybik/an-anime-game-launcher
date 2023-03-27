@@ -28,6 +28,7 @@ pub const APP_DEBUG: bool = cfg!(debug_assertions);
 pub static mut READY: bool = false;
 
 use std::env;
+use adw::ColorScheme;
 
 // TODO: get rid of using this function in all the components' events
 //       e.g. by converting preferences pages into Relm4 Components
@@ -122,13 +123,12 @@ fn main() {
 
     tracing::info!("Starting application ({APP_VERSION})");
 
-    if steam::is_steam_deck() {
-        for (key, value) in env::vars() {
-            tracing::warn!("{}", format!("Carried env {} :: {}", key, value ));
-        }
-    }
-
     adw::init().expect("Libadwaita initialization failed");
+
+    if steam::is_steam_deck() {
+        // Align with system.
+        adw::StyleManager::default().set_color_scheme(ColorScheme::PreferDark);
+    }
 
     // Register and include resources
     gtk::gio::resources_register_include!("resources.gresource")
