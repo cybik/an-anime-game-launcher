@@ -48,6 +48,7 @@ migrate = Migrate
 
 select-voice-packages = Select voice packages
 
+download-components-steam = Select somponents
 
 download-components = Download components
 download-dxvk = Download DXVK

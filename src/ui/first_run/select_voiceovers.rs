@@ -140,7 +140,7 @@ impl SimpleAsyncComponent for SelectVoiceoversApp {
                 match self.update_config() {
                     Ok(_) => {
                         if steam::launched_from_steam() {
-                            sender.output(Self::Output::ScrollToFinish)
+                            sender.output(Self::Output::ScrollToDownloadComponentsSteam)
                         } else {
                             sender.output(Self::Output::ScrollToDownloadComponents)
                         }
