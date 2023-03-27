@@ -3,6 +3,7 @@ pub mod welcome;
 pub mod tos_warning;
 pub mod dependencies;
 pub mod default_paths;
+pub mod default_paths_deck;
 pub mod select_voiceovers;
 pub mod download_components;
 pub mod finish;
