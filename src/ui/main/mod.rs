@@ -234,7 +234,7 @@ impl SimpleComponent for App {
                             gtk::Picture {
                                 set_resource: Some("/org/app/images/icon.png"),
                                 set_vexpand: true,
-                                set_content_fit: gtk::ContentFit::ScaleDown
+                                //set_content_fit: gtk::ContentFit::ScaleDown
                             },
 
                             gtk::Label {
