@@ -173,7 +173,7 @@ impl SimpleAsyncComponent for DownloadComponentsSteamApp {
     async fn update(&mut self, msg: Self::Input, sender: AsyncComponentSender<Self>) {
         match msg {
             DownloadComponentsSteamAppMsg::UpdateVersionsLists => {
-                let config = config::get().unwrap_or_else(|_| CONFIG.clone());
+                let config = Config::get().unwrap_or_else(|_| CONFIG.clone());
 
                 // 4 latest versions of 4 first available wine group
                 self.wine_versions = wine::get_groups(&config.components.path).unwrap()
@@ -186,15 +186,15 @@ impl SimpleAsyncComponent for DownloadComponentsSteamApp {
 
             #[allow(unused_must_use)]
             DownloadComponentsSteamAppMsg::ConfirmChoice => {
-                let mut config = config::get().unwrap_or_else(|_| CONFIG.clone());
+                let mut config = Config::get().unwrap_or_else(|_| CONFIG.clone());
 
                 self.selected_wine = Some(self.wine_versions[self.wine_combo.selected() as usize].clone());
 
                 let wine = self.selected_wine.clone().unwrap();
 
-                config.game.wine.selected = Some(wine.name);
+                config.game.wine.selected = Some(wine.name.clone());
 
-                if let Err(err) = config::update_raw(config) {
+                if let Err(err) = Config::update_raw(config) {
                     tracing::error!("Failed to update config: {err}");
 
                     sender.output(Self::Output::Toast {

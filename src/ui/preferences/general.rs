@@ -1172,7 +1172,7 @@ impl SimpleAsyncComponent for GeneralApp {
                                 if steam::is_prefix_update_disabled() {
                                     config.game.wine.selected = Some(wine_name);
 
-                                    config::update(config);
+                                    Config::update(config);
                                 } else {
                                 match wine.update_prefix::<&str>(None) {
                                     Ok(_) => {
