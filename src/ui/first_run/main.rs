@@ -42,6 +42,7 @@ pub enum FirstRunAppMsg {
     ScrollToDefaultPaths,
     ScrollToSelectVoiceovers,
     ScrollToDownloadComponents,
+    ScrollToDownloadSteamComponents,
     ScrollToFinish,
 
     Toast {
@@ -250,6 +251,16 @@ impl SimpleComponent for FirstRunApp {
 
                 // Scroll to download components page
                 // This will happen in background behind StatusPage
+                self.title = tr!("download-components");
+
+                self.carousel.scroll_to(self.download_components.widget(), true);
+            }
+
+            FirstRunAppMsg::ScrollToDownloadSteamComponents => {
+                // This will happen in background behind StatusPage
+                self.download_components.sender()
+                    .send(DownloadComponentsAppMsg::LoadManagedVersionLists)
+                    .expect("Issue");
                 self.title = tr!("download-components");
 
                 self.carousel.scroll_to(self.download_components.widget(), true);

@@ -56,6 +56,8 @@ select-voice-packages = Select voice packages
 
 
 download-components = Download components
+select-components = Select components
+select-component = Select
 download-dxvk = Download DXVK
 apply-dxvk = Apply DXVK
 
