@@ -7,6 +7,8 @@ use anime_launcher_sdk::wincompatlib::prelude::*;
 use anime_launcher_sdk::components::*;
 use anime_launcher_sdk::components::wine::UnifiedWine;
 
+use anime_launcher_sdk::integrations::steam;
+
 use super::GeneralAppMsg;
 
 use crate::ui::components::*;
@@ -24,7 +26,9 @@ pub struct ComponentsPage {
     selected_dxvk_version: u32,
 
     selecting_wine_version: bool,
-    selecting_dxvk_version: bool
+    selecting_dxvk_version: bool,
+
+    is_managed: bool
 }
 
 #[derive(Debug, Clone)]
@@ -103,6 +107,9 @@ impl SimpleAsyncComponent for ComponentsPage {
                         set_title: &tr!("recommended-only"),
                         set_subtitle: &tr!("wine-recommended-description"),
 
+                        #[watch]
+                        set_visible: !model.is_managed, // no need for this if Steam
+
                         add_suffix = &gtk::Switch {
                             set_valign: gtk::Align::Center,
 
@@ -120,10 +127,16 @@ impl SimpleAsyncComponent for ComponentsPage {
 
                 add = &adw::PreferencesGroup {
                     add = model.wine_components.widget(),
+
+                    #[watch]
+                    set_visible: !model.is_managed // no need for this section, it's managed outside
                 },
 
                 add = &adw::PreferencesGroup {
                     set_title: &tr!("wine-options"),
+
+                    #[watch]
+                    set_visible: !model.is_managed,
 
                     adw::ActionRow {
                         set_title: &tr!("wine-use-shared-libraries"),
@@ -174,6 +187,9 @@ impl SimpleAsyncComponent for ComponentsPage {
                     set_title: &tr!("dxvk-version"),
 
                     #[watch]
+                    set_visible: !model.is_managed,
+
+                    #[watch]
                     set_description: Some(&if !model.allow_dxvk_selection {
                         tr!("dxvk-selection-disabled")
                     } else {
@@ -207,7 +223,7 @@ impl SimpleAsyncComponent for ComponentsPage {
                             set_spinning: true,
 
                             #[watch]
-                            set_visible: model.selecting_dxvk_version
+                            set_visible: model.selecting_dxvk_version && !model.is_managed,
                         }
                     },
 
@@ -233,6 +249,9 @@ impl SimpleAsyncComponent for ComponentsPage {
                 add = &adw::PreferencesGroup {
                     #[watch]
                     set_sensitive: model.allow_dxvk_selection,
+
+                    #[watch]
+                    set_visible: !model.is_managed,
 
                     add = model.dxvk_components.widget(),
                 },
@@ -326,7 +345,12 @@ impl SimpleAsyncComponent for ComponentsPage {
             selected_dxvk_version: 0,
 
             selecting_wine_version: false,
-            selecting_dxvk_version: false
+            selecting_dxvk_version: false,
+
+            is_managed: match steam::launched_from() {
+                steam::LaunchedFrom::Steam => true,
+                steam::LaunchedFrom::Independent => false
+            }
         };
 
         let widgets = view_output!();
@@ -349,16 +373,32 @@ impl SimpleAsyncComponent for ComponentsPage {
             }
 
             ComponentsPageMsg::UpdateDownloadedWine => {
-                self.downloaded_wine_versions = wine::get_downloaded(&CONFIG.components.path, &CONFIG.game.wine.builds)
-                    .unwrap_or_default()
-                    .into_iter()
-                    .flat_map(|group| group.versions.clone().into_iter()
-                        .map(move |version| {
-                            let features = version.features_in(&group).unwrap_or_default();
+                match steam::launched_from() {
+                    steam::LaunchedFrom::Steam => {
+                        self.downloaded_wine_versions = wine::get_groups(&CONFIG.components.path)
+                            .unwrap()
+                            .into_iter()
+                            .flat_map(|group| group.versions.clone().into_iter()
+                                .map(move |version| {
+                                    let features = version.features_in(&group).unwrap_or_default();
 
-                            (version, features)
-                        })
-                    ).collect();
+                                    (version, features)
+                                })
+                            ).collect();
+                    },
+                    steam::LaunchedFrom::Independent => {
+                        self.downloaded_wine_versions = wine::get_downloaded(&CONFIG.components.path, &CONFIG.game.wine.builds)
+                            .unwrap_or_default()
+                            .into_iter()
+                            .flat_map(|group| group.versions.clone().into_iter()
+                                .map(move |version| {
+                                    let features = version.features_in(&group).unwrap_or_default();
+
+                                    (version, features)
+                                })
+                            ).collect();
+                    }
+                }
 
                 self.selected_wine_version = if let Some(selected) = &CONFIG.game.wine.selected {
                     let mut index = 0;
@@ -407,6 +447,25 @@ impl SimpleAsyncComponent for ComponentsPage {
 
             ComponentsPageMsg::SelectWine(index) => {
                 if let Ok(mut config) = Config::get() {
+                    if self.is_managed {
+                        // Write directly, as the version is known to be present.
+                        if let Some((version, _)) = self.downloaded_wine_versions.get(index) {
+                            let wine_name = version.name.to_string();
+                            config.game.wine.selected = Some(wine_name);
+                            match Config::update_raw(config) {
+                                Ok(_) => {
+                                    sender.input(ComponentsPageMsg::ResetWineSelection(index));
+                                }
+                                Err(err) => {
+                                    sender.output(GeneralAppMsg::Toast {
+                                        title: tr!("config-update-error"),
+                                        description: Some(err.to_string())
+                                    }).unwrap();
+                                }
+                            }
+                        }
+                        return;
+                    }
                     if let Some((version, features)) = self.downloaded_wine_versions.get(index) {
                         if config.game.wine.selected.as_ref() != Some(&version.title) {
                             self.selecting_wine_version = true;

@@ -30,6 +30,8 @@ use crate::*;
 use super::gamescope::*;
 use super::main::PreferencesAppMsg;
 
+use anime_launcher_sdk::integrations::steam;
+
 #[derive(Debug)]
 struct DiscordRpcIcon {
     pub check_button: gtk::CheckButton,
@@ -546,6 +548,10 @@ impl SimpleAsyncComponent for EnhancementsApp {
 
             add = &adw::PreferencesGroup {
                 set_title: &tr!("fps-unlocker"),
+                set_visible: match steam::launched_from() {
+                    steam::LaunchedFrom::Steam => false,
+                    steam::LaunchedFrom::Independent => true
+                },
 
                 adw::ComboRow {
                     set_title: &tr!("enabled"),
@@ -588,7 +594,10 @@ impl SimpleAsyncComponent for EnhancementsApp {
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
 
-                        set_state: CONFIG.game.enhancements.fps_unlocker.enabled,
+                        set_state: match steam::launched_from() {
+                            steam::LaunchedFrom::Steam => false,
+                            steam::LaunchedFrom::Independent => CONFIG.game.enhancements.fps_unlocker.enabled
+                        },
 
                         connect_state_notify => |switch| {
                             if is_ready() {

@@ -18,6 +18,8 @@ use anime_launcher_sdk::genshin::config::schema::prelude::*;
 use anime_launcher_sdk::anime_game_core::genshin::consts::GameEdition;
 use anime_launcher_sdk::genshin::env_emulation::Environment;
 
+use anime_launcher_sdk::integrations::steam;
+
 pub mod components;
 
 use components::*;
@@ -345,6 +347,11 @@ impl SimpleAsyncComponent for GeneralApp {
                         set_label: &tr!("migrate-installation"),
                         set_tooltip_text: Some(&tr!("migrate-installation-description")),
 
+                        set_visible: match steam::launched_from() {
+                            steam::LaunchedFrom::Steam => false,
+                            steam::LaunchedFrom::Independent => true
+                        },
+
                         connect_clicked => GeneralAppMsg::OpenMigrateInstallation
                     },
 
@@ -469,6 +476,11 @@ impl SimpleAsyncComponent for GeneralApp {
 
                 adw::ExpanderRow {
                     set_title: &tr!("wine-tools"),
+
+                    set_visible: match steam::launched_from() {
+                        steam::LaunchedFrom::Steam => false,
+                        steam::LaunchedFrom::Independent => true
+                    },
 
                     add_row = &adw::ActionRow {
                         set_title: &tr!("command-line"),
