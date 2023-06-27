@@ -14,6 +14,8 @@ use anime_launcher_sdk::components::wine::UnifiedWine;
 use anime_launcher_sdk::config::ConfigExt;
 use anime_launcher_sdk::genshin::config::Config;
 
+use anime_launcher_sdk::integrations::steam;
+
 use super::main::FirstRunAppMsg;
 
 use crate::ui::components::*;
@@ -59,16 +61,25 @@ pub struct DownloadComponentsApp {
     /// `Some(true)` - done
     applying_dxvk: Option<bool>,
 
-    downloading: bool
+    downloading: bool,
+    is_managed: bool
 }
 
 #[derive(Debug, Clone)]
 pub enum DownloadComponentsAppMsg {
+    // Flow: Typical
     UpdateVersionsLists,
     DownloadWine,
     CreatePrefix,
     DownloadDXVK,
     ApplyDXVK,
+
+    // Flow: Steam
+    LoadManagedVersionLists,
+    SelectWine,
+
+    // Standard
+    SelectOrDownloadWine,
     Continue,
     Exit
 }
@@ -88,7 +99,7 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 set_vexpand: true,
 
                 gtk::Label {
-                    set_label: &tr("download-components"),
+                    set_label: &tr("select-components"),
                     add_css_class: "title-1"
                 }
             },
@@ -103,6 +114,7 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 #[local_ref]
                 wine_combo -> adw::ComboRow {
                     set_title: &tr("wine-version"),
+                    add_css_class: "wine-row",
 
                     #[watch]
                     set_model: Some(&gtk::StringList::new(model.wine_versions.iter()
@@ -114,6 +126,10 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 #[local_ref]
                 dxvk_combo -> adw::ComboRow {
                     set_title: &tr("dxvk-version"),
+                    add_css_class: "dxvk-row",
+
+                    #[watch]
+                    set_visible: !model.is_managed,
 
                     #[watch]
                     set_model: Some(&gtk::StringList::new(model.dxvk_versions.iter()
@@ -136,10 +152,11 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                     set_spacing: 8,
 
                     gtk::Button {
-                        set_label: &tr("download"),
+                        set_label: &tr("select-component"),
+                        //set_label: &tr("download"),
                         set_css_classes: &["suggested-action", "pill"],
 
-                        connect_clicked => DownloadComponentsAppMsg::DownloadWine
+                        connect_clicked => DownloadComponentsAppMsg::SelectOrDownloadWine
                     },
 
                     gtk::Button {
@@ -294,7 +311,8 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
 
             applying_dxvk: None,
 
-            downloading: false
+            downloading: false,
+            is_managed: false
         };
 
         model.progress_bar.widget().set_width_request(360);
@@ -325,6 +343,26 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                     .take(4)
                     .flat_map(|group| group.versions.into_iter().take(4))
                     .collect();
+            }
+
+            DownloadComponentsAppMsg::LoadManagedVersionLists => {
+                let config = Config::get().unwrap_or_else(|_| CONFIG.clone());
+
+                // 4 latest versions of 4 first available wine group
+                self.wine_versions = wine::get_groups(&config.components.path).unwrap()
+                    .into_iter()
+                    .take(4)
+                    .flat_map(|group| group.versions.into_iter().take(4))
+                    .collect();
+                self.is_managed = true;
+            }
+
+            #[allow(unused_must_use)]
+            DownloadComponentsAppMsg::SelectOrDownloadWine => {
+                match steam::launched_from() {
+                    steam::LaunchedFrom::Steam => sender.input(DownloadComponentsAppMsg::SelectWine),
+                    steam::LaunchedFrom::Independent => sender.input(DownloadComponentsAppMsg::DownloadWine)
+                }
             }
 
             #[allow(unused_must_use)]
@@ -434,6 +472,27 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                         }
                     });
                 }
+            }
+
+            #[allow(unused_must_use)]
+            DownloadComponentsAppMsg::SelectWine => {
+                self.selected_wine = Some(self.wine_versions[self.wine_combo.selected() as usize].clone());
+
+                let wine = self.selected_wine.clone().unwrap();
+
+                let mut config = Config::get().unwrap_or_else(|_| CONFIG.clone());
+
+                config.game.wine.selected = Some(wine.name);
+
+                if let Err(err) = Config::update_raw(config) {
+                    tracing::error!("Failed to update config: {err}");
+
+                    sender.output(Self::Output::Toast {
+                        title: tr("config-update-error"),
+                        description: Some(err.to_string())
+                    });
+                }
+                sender.input(DownloadComponentsAppMsg::Continue);
             }
 
             // TODO: perhaps I could re-use main/create_prefix.rs here?

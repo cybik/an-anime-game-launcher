@@ -10,6 +10,8 @@ use crate::i18n::*;
 
 use super::main::*;
 
+use anime_launcher_sdk::integrations::steam;
+
 pub struct SelectVoiceoversApp {
     english: gtk::Switch,
     japanese: gtk::Switch,
@@ -139,7 +141,17 @@ impl SimpleAsyncComponent for SelectVoiceoversApp {
             #[allow(unused_must_use)]
             SelectVoiceoversAppMsg::Continue => {
                 match self.update_config() {
-                    Ok(_) => sender.output(Self::Output::ScrollToDownloadComponents),
+                    Ok(_) => {
+                        match steam::launched_from() {
+                            steam::LaunchedFrom::Steam => {
+                                //sender.output(Self::Output::ScrollToFinish)
+                                sender.output(Self::Output::ScrollToDownloadSteamComponents)
+                            },
+                            steam::LaunchedFrom::Independent => {
+                                sender.output(Self::Output::ScrollToDownloadComponents)
+                            }
+                        }
+                    },
     
                     Err(err) => sender.output(Self::Output::Toast {
                         title: tr("config-update-error"),
