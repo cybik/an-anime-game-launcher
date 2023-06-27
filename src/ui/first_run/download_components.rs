@@ -114,7 +114,6 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 #[local_ref]
                 wine_combo -> adw::ComboRow {
                     set_title: &tr("wine-version"),
-                    add_css_class: "wine-row",
 
                     #[watch]
                     set_model: Some(&gtk::StringList::new(model.wine_versions.iter()
@@ -126,7 +125,6 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 #[local_ref]
                 dxvk_combo -> adw::ComboRow {
                     set_title: &tr("dxvk-version"),
-                    add_css_class: "dxvk-row",
 
                     #[watch]
                     set_visible: !model.is_managed,
@@ -153,7 +151,6 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
 
                     gtk::Button {
                         set_label: &tr("select-component"),
-                        //set_label: &tr("download"),
                         set_css_classes: &["suggested-action", "pill"],
 
                         connect_clicked => DownloadComponentsAppMsg::SelectOrDownloadWine
@@ -351,8 +348,7 @@ impl SimpleAsyncComponent for DownloadComponentsApp {
                 // 4 latest versions of 4 first available wine group
                 self.wine_versions = wine::get_groups(&config.components.path).unwrap()
                     .into_iter()
-                    .take(4)
-                    .flat_map(|group| group.versions.into_iter().take(4))
+                    .flat_map(|group| group.versions.into_iter())
                     .collect();
                 self.is_managed = true;
             }

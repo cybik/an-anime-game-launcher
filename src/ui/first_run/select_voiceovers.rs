@@ -143,13 +143,8 @@ impl SimpleAsyncComponent for SelectVoiceoversApp {
                 match self.update_config() {
                     Ok(_) => {
                         match steam::launched_from() {
-                            steam::LaunchedFrom::Steam => {
-                                //sender.output(Self::Output::ScrollToFinish)
-                                sender.output(Self::Output::ScrollToDownloadSteamComponents)
-                            },
-                            steam::LaunchedFrom::Independent => {
-                                sender.output(Self::Output::ScrollToDownloadComponents)
-                            }
+                            steam::LaunchedFrom::Steam => sender.output(Self::Output::ScrollToDownloadSteamComponents),
+                            steam::LaunchedFrom::Independent => sender.output(Self::Output::ScrollToDownloadComponents)
                         }
                     },
     
