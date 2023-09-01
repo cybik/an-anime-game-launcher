@@ -457,6 +457,26 @@ impl SimpleAsyncComponent for GeneralApp {
                             }
                         }
                     }
+                },
+                adw::ActionRow {
+                    set_title: &tr!("telemetry-behavior"),
+                    set_subtitle: &tr!("telemetry-behavior-description"),
+
+                    add_suffix = &gtk::Switch {
+                        set_valign: gtk::Align::Center,
+
+                        set_state: CONFIG.game.telemetry_ignored,
+
+                        connect_state_notify => |switch| {
+                            if is_ready() {
+                                if let Ok(mut config) = Config::get() {
+                                    config.game.telemetry_ignored = switch.state();
+
+                                    Config::update(config);
+                                }
+                            }
+                        }
+                    }
                 }
             },
 

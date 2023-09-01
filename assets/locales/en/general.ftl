@@ -61,6 +61,9 @@ ask-superuser-permissions-description = Launcher will use them to automatically 
 launcher-behavior = Launcher behavior
 launcher-behavior-description = What should launcher window do when it starts the game
 
+telemetry-behavior = Ignore telemetry status
+telemetry-behavior-description = DANGER. Enable this only if you wish to ignore telemetry measures.
+
 wine-tools = Wine tools
 command-line = Command line
 registry-editor = Registry editor
